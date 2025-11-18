@@ -1,121 +1,201 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:bump_app/services/location_service.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Supabase 초기화
+  await Supabase.initialize(
+    url: 'https://uilmcneizmsqiercrlrt.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpbG1jbmVpem1zcWllcmNybHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNjM0NjIsImV4cCI6MjA3ODkzOTQ2Mn0.3SdFUJEDlKgB1pbjEdNSLv6Dc1QBeaqa9pP6X5GWLGY',
+  );
+  
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Bump App',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const BumpHomePage(title: 'Bump - 위치 기반 만남'),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
+class BumpHomePage extends StatefulWidget {
+  const BumpHomePage({super.key, required this.title});
 
   final String title;
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<BumpHomePage> createState() => _BumpHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
+class _BumpHomePageState extends State<BumpHomePage> {
+  final LocationService _locationService = LocationService();
+  String _statusMessage = '위치 추적을 시작하세요';
+  bool _isLocationTracking = false;
+  
+  @override
+  void initState() {
+    super.initState();
+    _initializeLocationTracking();
+  }
+  
+  /// 위치 추적 초기화
+  /// 
+  /// 앱 시작 시 권한을 확인하고, 필요하면 사용자에게 권한을 요청합니다.
+  Future<void> _initializeLocationTracking() async {
+    try {
+      // 위치 권한 요청
+      bool hasPermission = await _locationService.requestLocationPermission();
+      
+      if (hasPermission) {
+        setState(() {
+          _statusMessage = '위치 권한이 허용되었습니다. 추적을 시작할 준비가 되었습니다.';
+        });
+      } else {
+        setState(() {
+          _statusMessage = '위치 권한이 필요합니다.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _statusMessage = '권한 확인 중 오류: $e';
+      });
+    }
+  }
+  
+  /// 위치 추적 시작
+  Future<void> _startTracking() async {
+    try {
+      // 임시 사용자 ID (실제로는 로그인한 사용자의 ID를 사용해야 합니다)
+      const userId = 'test-user-123';
+      
+      await _locationService.startLocationTracking(userId);
+      
+      setState(() {
+        _isLocationTracking = true;
+        _statusMessage = '위치 추적 중... (5초 간격으로 저장됨)';
+      });
+    } catch (e) {
+      setState(() {
+        _statusMessage = '추적 시작 중 오류: $e';
+      });
+    }
+  }
+  
+  /// 위치 추적 중지
+  void _stopTracking() {
+    _locationService.stopLocationTracking();
+    
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _isLocationTracking = false;
+      _statusMessage = '위치 추적이 중지되었습니다.';
     });
+  }
+  
+  /// 현재 위치 한 번만 조회
+  Future<void> _getCurrentLocation() async {
+    try {
+      final position = await _locationService.getCurrentLocation();
+      
+      if (position != null) {
+        setState(() {
+          _statusMessage = 
+            '현재 위치: ${position.latitude.toStringAsFixed(6)}, '
+            '${position.longitude.toStringAsFixed(6)}';
+        });
+      } else {
+        setState(() {
+          _statusMessage = '위치를 가져올 수 없습니다.';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _statusMessage = '위치 조회 중 오류: $e';
+      });
+    }
+  }
+  
+  @override
+  void dispose() {
+    // 앱 종료 시 위치 추적 중지
+    _locationService.stopLocationTracking();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            // 상태 메시지
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                _statusMessage,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+            
+            // 위치 추적 상태
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.blue),
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
+                child: Text(
+                  _isLocationTracking ? '🔴 추적 중' : '⚪ 추적 중지',
+                  style: Theme.of(context).textTheme.headlineSmall,
+                ),
+              ),
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // 버튼들
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: _isLocationTracking ? null : _startTracking,
+                  child: const Text('추적 시작'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: _isLocationTracking ? _stopTracking : null,
+                  child: const Text('추적 중지'),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: 16),
+            
+            ElevatedButton(
+              onPressed: _getCurrentLocation,
+              child: const Text('현재 위치 조회'),
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
       ),
     );
   }
