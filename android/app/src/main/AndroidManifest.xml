@@ -1,5 +1,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Google Maps 및 위치 정보 권한 -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- 백그라운드 위치 추적을 위한 권한 (Android 10 이상) -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
+    <!-- Foreground Service 권한 (백그라운드 위치 추적 필수) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <application
+        android:usesCleartextTraffic="true"
         android:label="bump_app"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
@@ -30,6 +39,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+    <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="YOUR_GOOGLE_MAPS_API_KEY_HERE" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
