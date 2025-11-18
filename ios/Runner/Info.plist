@@ -19,7 +19,7 @@
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>앱이 백그라운드에 있을 때도 'Bump' 감지 기능을 위해 위치 정보가 필요합니다. 이 정보는 24시간 후에 자동 삭제됩니다.</string>
 	<key>GoogleMapsApiKey</key>
-	<string>YOUR_GOOGLE_MAPS_API_KEY_HERE</string>
+	<string>AIzaSyCuMy4ZPIKSnSVbOkdt1rGOCYYcQeWA_8s</string>
 	<key>CFBundleName</key>
 	<string>bump_app</string>
 	<key>CFBundlePackageType</key>
