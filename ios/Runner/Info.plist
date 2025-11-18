@@ -12,6 +12,14 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>사용자가 앱을 사용하는 동안 현재 위치를 표시하고, 주변의 다른 사용자를 감지하기 위해 위치 정보가 필요합니다.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>앱이 백그라운드에 있을 때도 'Bump' 감지 기능을 위해 위치 정보가 필요합니다. 이 정보는 24시간 후에 자동 삭제됩니다.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>앱이 백그라운드에 있을 때도 'Bump' 감지 기능을 위해 위치 정보가 필요합니다. 이 정보는 24시간 후에 자동 삭제됩니다.</string>
+	<key>GoogleMapsApiKey</key>
+	<string>YOUR_GOOGLE_MAPS_API_KEY_HERE</string>
 	<key>CFBundleName</key>
 	<string>bump_app</string>
 	<key>CFBundlePackageType</key>
