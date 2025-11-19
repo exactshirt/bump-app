@@ -1,0 +1,23 @@
+{
+  "@@locale": "ko",
+  "appTitle": "Bump - 위치 기반 만남",
+  "startLocationTracking": "추적 시작",
+  "stopLocationTracking": "추적 중지",
+  "getCurrentLocation": "현재 위치 조회",
+  "findBumps": "Bump 찾기",
+  "statusStart": "위치 추적을 시작하세요",
+  "statusPermissionGranted": "위치 권한이 허용되었습니다. 추적을 시작할 준비가 되었습니다.",
+  "statusPermissionRequired": "위치 권한이 필요합니다.",
+  "statusPermissionError": "권한 확인 중 오류: {error}",
+  "statusTracking": "위치 추적 중... (적응형 빈도: {interval}초)",
+  "statusTrackingError": "추적 시작 중 오류: {error}",
+  "statusStopped": "위치 추적이 중지되었습니다.",
+  "statusCurrentLocation": "현재 위치: {lat}, {lon}",
+  "statusLocationUnavailable": "위치를 가져올 수 없습니다.",
+  "statusLocationError": "위치 조회 중 오류: {error}",
+  "statusBumpsFound": "{count}개의 새로운 Bump를 찾았습니다!",
+  "statusBumpsError": "Bump 찾기 중 오류: {error}",
+  "trackingActive": "🔴 추적 중",
+  "trackingInactive": "⚪ 추적 중지",
+  "bumpWith": "Bump with {userId}"
+}

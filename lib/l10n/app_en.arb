@@ -1,0 +1,126 @@
+{
+  "@@locale": "en",
+  "appTitle": "Bump - Location-based Connections",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
+  "startLocationTracking": "Start Tracking",
+  "@startLocationTracking": {
+    "description": "Button to start location tracking"
+  },
+  "stopLocationTracking": "Stop Tracking",
+  "@stopLocationTracking": {
+    "description": "Button to stop location tracking"
+  },
+  "getCurrentLocation": "Get Current Location",
+  "@getCurrentLocation": {
+    "description": "Button to get current location once"
+  },
+  "findBumps": "Find Bumps",
+  "@findBumps": {
+    "description": "Button to find nearby users"
+  },
+  "statusStart": "Start location tracking",
+  "@statusStart": {
+    "description": "Initial status message"
+  },
+  "statusPermissionGranted": "Location permission granted. Ready to start tracking.",
+  "@statusPermissionGranted": {
+    "description": "Status when permission is granted"
+  },
+  "statusPermissionRequired": "Location permission required.",
+  "@statusPermissionRequired": {
+    "description": "Status when permission is needed"
+  },
+  "statusPermissionError": "Permission check error: {error}",
+  "@statusPermissionError": {
+    "description": "Status when permission check fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "statusTracking": "Location tracking... (Adaptive frequency: {interval}s)",
+  "@statusTracking": {
+    "description": "Status when tracking is active",
+    "placeholders": {
+      "interval": {
+        "type": "int"
+      }
+    }
+  },
+  "statusTrackingError": "Tracking start error: {error}",
+  "@statusTrackingError": {
+    "description": "Status when tracking fails to start",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "statusStopped": "Location tracking stopped.",
+  "@statusStopped": {
+    "description": "Status when tracking is stopped"
+  },
+  "statusCurrentLocation": "Current location: {lat}, {lon}",
+  "@statusCurrentLocation": {
+    "description": "Status showing current location",
+    "placeholders": {
+      "lat": {
+        "type": "String"
+      },
+      "lon": {
+        "type": "String"
+      }
+    }
+  },
+  "statusLocationUnavailable": "Unable to get location.",
+  "@statusLocationUnavailable": {
+    "description": "Status when location is unavailable"
+  },
+  "statusLocationError": "Location query error: {error}",
+  "@statusLocationError": {
+    "description": "Status when location query fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "statusBumpsFound": "Found {count} new Bumps!",
+  "@statusBumpsFound": {
+    "description": "Status when bumps are found",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statusBumpsError": "Bump search error: {error}",
+  "@statusBumpsError": {
+    "description": "Status when bump search fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "trackingActive": "🔴 Tracking",
+  "@trackingActive": {
+    "description": "Indicator when tracking is active"
+  },
+  "trackingInactive": "⚪ Stopped",
+  "@trackingInactive": {
+    "description": "Indicator when tracking is stopped"
+  },
+  "bumpWith": "Bump with {userId}",
+  "@bumpWith": {
+    "description": "Title for bump list item",
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  }
+}
