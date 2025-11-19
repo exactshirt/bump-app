@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bump_app/services/location_service.dart';
+import 'package:bump_app/services/bump_service.dart';
+import 'package:bump_app/models/bump.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,6 +42,8 @@ class BumpHomePage extends StatefulWidget {
 }
 
 class _BumpHomePageState extends State<BumpHomePage> {
+  final BumpService _bumpService = BumpService();
+  List<Bump> _bumps = [];
   final LocationService _locationService = LocationService();
   String _statusMessage = '위치 추적을 시작하세요';
   bool _isLocationTracking = false;
@@ -126,6 +130,25 @@ class _BumpHomePageState extends State<BumpHomePage> {
     }
   }
   
+  /// Bump 찾기
+  Future<void> _findBumps() async {
+    try {
+      // 임시 사용자 ID (실제로는 로그인한 사용자의 ID를 사용해야 합니다)
+      const userId = 'test-user-123';
+      
+      final newBumps = await _bumpService.findBumps(userId);
+      
+      setState(() {
+        _bumps.addAll(newBumps);
+        _statusMessage = '${newBumps.length}개의 새로운 Bump를 찾았습니다!';
+      });
+    } catch (e) {
+      setState(() {
+        _statusMessage = 'Bump 찾기 중 오류: $e';
+      });
+    }
+  }
+
   @override
   void dispose() {
     // 앱 종료 시 위치 추적 중지
@@ -193,6 +216,25 @@ class _BumpHomePageState extends State<BumpHomePage> {
             ElevatedButton(
               onPressed: _getCurrentLocation,
               child: const Text('현재 위치 조회'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _findBumps,
+              child: const Text('Bump 찾기'),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: ListView.builder(
+                itemCount: _bumps.length,
+                itemBuilder: (context, index) {
+                  final bump = _bumps[index];
+                  return ListTile(
+                    leading: const Icon(Icons.person_pin_circle),
+                    title: Text('Bump with ${bump.user2Id}'),
+                    subtitle: Text(bump.timestamp.toLocal().toString()),
+                  );
+                },
+              ),
             ),
           ],
         ),
