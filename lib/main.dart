@@ -231,7 +231,7 @@ class _BumpHomePageState extends State<BumpHomePage> {
                   return ListTile(
                     leading: const Icon(Icons.person_pin_circle),
                     title: Text('Bump with ${bump.user2Id}'),
-                    subtitle: Text(bump.timestamp.toLocal().toString()),
+                    subtitle: Text(bump.bumpedAt.toLocal().toString()),
                   );
                 },
               ),
