@@ -12,7 +12,7 @@ CREATE OR REPLACE FUNCTION find_nearby_users(
     distance_meters FLOAT,
     time_interval_hours INT
 )
-RETURNS TABLE (bump_id UUID, user1_id UUID, user2_id UUID, timestamp TIMESTAMPTZ)
+RETURNS TABLE (bump_id UUID, user1_id UUID, user2_id UUID, bumped_at TIMESTAMPTZ)
 AS $$
 DECLARE
     current_user_location GEOMETRY;
@@ -57,7 +57,7 @@ BEGIN
         nb.id AS bump_id,
         nb.user1_id,
         nb.user2_id,
-        nb.timestamp
+        nb.timestamp AS bumped_at
     FROM new_bumps nb;
 
 END;
