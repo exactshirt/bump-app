@@ -7,6 +7,10 @@
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"/>
     <!-- Foreground Service 권한 (백그라운드 위치 추적 필수) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <!-- 알림 권한 (Android 13 이상) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- 진동 권한 -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <application
         android:usesCleartextTraffic="true"
         android:label="bump_app"

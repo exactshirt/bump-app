@@ -1,8 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bump_app/models/bump.dart';
+import 'package:bump_app/services/notification_service.dart';
 
 class BumpService {
   final SupabaseClient _supabase = Supabase.instance.client;
+  final NotificationService _notificationService = NotificationService();
 
   /// 현재 사용자와 가까운 거리에 있는 다른 사용자를 찾아 Bump를 생성합니다.
   ///
@@ -36,7 +38,23 @@ class BumpService {
 
       // 함수 호출 결과(새로운 Bump 목록)를 List<Bump>으로 변환합니다.
       final List<dynamic> data = response.data;
-      return data.map((json) => Bump.fromJson(json)).toList();
+      final bumps = data.map((json) => Bump.fromJson(json)).toList();
+
+      // 새로운 Bump가 발견되면 알림 표시
+      if (bumps.isNotEmpty) {
+        if (bumps.length == 1) {
+          // 단일 Bump 알림
+          await _notificationService.showBumpNotification(
+            bumpId: bumps[0].id,
+            otherUserId: bumps[0].user2Id,
+          );
+        } else {
+          // 다중 Bump 알림
+          await _notificationService.showMultipleBumpsNotification(bumps.length);
+        }
+      }
+
+      return bumps;
 
     } catch (e) {
       print('Bump 서비스 오류: $e');

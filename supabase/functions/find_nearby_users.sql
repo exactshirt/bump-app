@@ -13,6 +13,8 @@ CREATE OR REPLACE FUNCTION find_nearby_users(
     time_interval_hours INT
 )
 RETURNS TABLE (bump_id UUID, user1_id UUID, user2_id UUID, bumped_at TIMESTAMPTZ)
+LANGUAGE plpgsql
+SECURITY DEFINER
 AS $$
 DECLARE
     current_user_location GEOMETRY;
@@ -49,7 +51,7 @@ BEGIN
             WHERE
                 (b.user1_id = current_user_id AND b.user2_id = nu.nearby_user_id) OR
                 (b.user1_id = nu.nearby_user_id AND b.user2_id = current_user_id)
-                AND b.timestamp > (NOW() - (time_interval_hours || ' hours')::INTERVAL)
+                AND b.bumped_at > (NOW() - (time_interval_hours || ' hours')::INTERVAL)
         )
         RETURNING *
     )
@@ -57,8 +59,8 @@ BEGIN
         nb.id AS bump_id,
         nb.user1_id,
         nb.user2_id,
-        nb.timestamp AS bumped_at
+        nb.bumped_at AS bumped_at
     FROM new_bumps nb;
 
 END;
-$$ LANGUAGE plpgsql;
+$$;

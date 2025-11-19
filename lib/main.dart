@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:bump_app/services/location_service.dart';
-import 'package:bump_app/services/bump_service.dart';
-import 'package:bump_app/models/bump.dart';
+import 'package:bump_app/screens/auth_screen.dart';
+import 'package:bump_app/screens/home_screen.dart';
+import 'package:bump_app/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Supabase 초기화
   await Supabase.initialize(
     url: 'https://uilmcneizmsqiercrlrt.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVpbG1jbmVpem1zcWllcmNybHJ0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMzNjM0NjIsImV4cCI6MjA3ODkzOTQ2Mn0.3SdFUJEDlKgB1pbjEdNSLv6Dc1QBeaqa9pP6X5GWLGY',
   );
-  
+
+  // 알림 서비스 초기화
+  await NotificationService().initialize();
+
   runApp(const MyApp());
 }
 
@@ -27,218 +30,48 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const BumpHomePage(title: 'Bump - 위치 기반 만남'),
+      home: const AuthWrapper(),
     );
   }
 }
 
-class BumpHomePage extends StatefulWidget {
-  const BumpHomePage({super.key, required this.title});
-
-  final String title;
+/// 인증 상태에 따라 화면을 전환하는 위젯
+class AuthWrapper extends StatefulWidget {
+  const AuthWrapper({super.key});
 
   @override
-  State<BumpHomePage> createState() => _BumpHomePageState();
+  State<AuthWrapper> createState() => _AuthWrapperState();
 }
 
-class _BumpHomePageState extends State<BumpHomePage> {
-  final BumpService _bumpService = BumpService();
-  List<Bump> _bumps = [];
-  final LocationService _locationService = LocationService();
-  String _statusMessage = '위치 추적을 시작하세요';
-  bool _isLocationTracking = false;
-  
-  @override
-  void initState() {
-    super.initState();
-    _initializeLocationTracking();
-  }
-  
-  /// 위치 추적 초기화
-  /// 
-  /// 앱 시작 시 권한을 확인하고, 필요하면 사용자에게 권한을 요청합니다.
-  Future<void> _initializeLocationTracking() async {
-    try {
-      // 위치 권한 요청
-      bool hasPermission = await _locationService.requestLocationPermission();
-      
-      if (hasPermission) {
-        setState(() {
-          _statusMessage = '위치 권한이 허용되었습니다. 추적을 시작할 준비가 되었습니다.';
-        });
-      } else {
-        setState(() {
-          _statusMessage = '위치 권한이 필요합니다.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _statusMessage = '권한 확인 중 오류: $e';
-      });
-    }
-  }
-  
-  /// 위치 추적 시작
-  Future<void> _startTracking() async {
-    try {
-      // 임시 사용자 ID (실제로는 로그인한 사용자의 ID를 사용해야 합니다)
-      const userId = 'test-user-123';
-      
-      await _locationService.startLocationTracking(userId);
-      
-      setState(() {
-        _isLocationTracking = true;
-        _statusMessage = '위치 추적 중... (5초 간격으로 저장됨)';
-      });
-    } catch (e) {
-      setState(() {
-        _statusMessage = '추적 시작 중 오류: $e';
-      });
-    }
-  }
-  
-  /// 위치 추적 중지
-  void _stopTracking() {
-    _locationService.stopLocationTracking();
-    
-    setState(() {
-      _isLocationTracking = false;
-      _statusMessage = '위치 추적이 중지되었습니다.';
-    });
-  }
-  
-  /// 현재 위치 한 번만 조회
-  Future<void> _getCurrentLocation() async {
-    try {
-      final position = await _locationService.getCurrentLocation();
-      
-      if (position != null) {
-        setState(() {
-          _statusMessage = 
-            '현재 위치: ${position.latitude.toStringAsFixed(6)}, '
-            '${position.longitude.toStringAsFixed(6)}';
-        });
-      } else {
-        setState(() {
-          _statusMessage = '위치를 가져올 수 없습니다.';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _statusMessage = '위치 조회 중 오류: $e';
-      });
-    }
-  }
-  
-  /// Bump 찾기
-  Future<void> _findBumps() async {
-    try {
-      // 임시 사용자 ID (실제로는 로그인한 사용자의 ID를 사용해야 합니다)
-      const userId = 'test-user-123';
-      
-      final newBumps = await _bumpService.findBumps(userId);
-      
-      setState(() {
-        _bumps.addAll(newBumps);
-        _statusMessage = '${newBumps.length}개의 새로운 Bump를 찾았습니다!';
-      });
-    } catch (e) {
-      setState(() {
-        _statusMessage = 'Bump 찾기 중 오류: $e';
-      });
-    }
-  }
-
-  @override
-  void dispose() {
-    // 앱 종료 시 위치 추적 중지
-    _locationService.stopLocationTracking();
-    super.dispose();
-  }
+class _AuthWrapperState extends State<AuthWrapper> {
+  final SupabaseClient _supabase = Supabase.instance.client;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // 상태 메시지
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text(
-                _statusMessage,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
+    return StreamBuilder<AuthState>(
+      stream: _supabase.auth.onAuthStateChange,
+      builder: (context, snapshot) {
+        // 인증 상태를 확인하여 적절한 화면 표시
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          // 로딩 중
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
             ),
-            
-            // 위치 추적 상태
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue),
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Text(
-                  _isLocationTracking ? '🔴 추적 중' : '⚪ 추적 중지',
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-              ),
-            ),
-            
-            const SizedBox(height: 32),
-            
-            // 버튼들
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: _isLocationTracking ? null : _startTracking,
-                  child: const Text('추적 시작'),
-                ),
-                const SizedBox(width: 16),
-                ElevatedButton(
-                  onPressed: _isLocationTracking ? _stopTracking : null,
-                  child: const Text('추적 중지'),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: 16),
-            
-            ElevatedButton(
-              onPressed: _getCurrentLocation,
-              child: const Text('현재 위치 조회'),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _findBumps,
-              child: const Text('Bump 찾기'),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: _bumps.length,
-                itemBuilder: (context, index) {
-                  final bump = _bumps[index];
-                  return ListTile(
-                    leading: const Icon(Icons.person_pin_circle),
-                    title: Text('Bump with ${bump.user2Id}'),
-                    subtitle: Text(bump.bumpedAt.toLocal().toString()),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+          );
+        }
+
+        // 현재 사용자 확인
+        final user = _supabase.auth.currentUser;
+
+        if (user == null) {
+          // 로그인되지 않음 -> 인증 화면 표시
+          return const AuthScreen();
+        } else {
+          // 로그인됨 -> 홈 화면 표시
+          return const HomeScreen();
+        }
+      },
     );
   }
 }
