@@ -1,22 +1,30 @@
 import 'dart:async';
 import 'package:geolocator/geolocator.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:h3_flutter/h3_flutter.dart';
 
 /// 위치 추적 서비스
-/// 
+///
 /// 이 클래스는 다음 기능을 담당합니다:
 /// 1. 사용자의 현재 위치를 주기적으로(5초 간격) 가져오기
 /// 2. 가져온 위치 데이터를 Supabase의 `locations` 테이블에 저장
-/// 3. 24시간 이상 된 위치 데이터 자동 삭제
+/// 3. H3 공간 인덱스 생성 및 저장 (resolution 12, ~30m 셀 크기)
+/// 4. 24시간 이상 된 위치 데이터 자동 삭제
 class LocationService {
   static final LocationService _instance = LocationService._internal();
-  
+
   /// Singleton 패턴: 앱 전체에서 하나의 LocationService만 존재
   factory LocationService() {
     return _instance;
   }
-  
-  LocationService._internal();
+
+  LocationService._internal() {
+    // H3 인스턴스 초기화
+    _h3 = const H3Factory().load();
+  }
+
+  // H3 인스턴스
+  late final H3 _h3;
   
   // 위치 추적 타이머
   Timer? _locationTimer;
@@ -107,10 +115,20 @@ class LocationService {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.best,
       );
-      
+
+      // H3 인덱스 생성 (resolution 12: ~30m 셀 크기)
+      // 이는 bump 탐지 거리(30m)와 일치합니다
+      final h3Index = _h3.geoToH3(
+        GeoCoord(
+          lat: position.latitude,
+          lon: position.longitude,
+        ),
+        12, // resolution
+      );
+
       // Supabase 클라이언트 가져오기
       final supabase = Supabase.instance.client;
-      
+
       // 위치 데이터를 `locations` 테이블에 저장
       await supabase.from('locations').insert({
         'user_id': userId,
@@ -119,9 +137,10 @@ class LocationService {
         'accuracy': position.accuracy,
         'altitude': position.altitude,
         'timestamp': DateTime.now().toIso8601String(),
+        'h3_index': h3Index,
       });
-      
-      print('위치 저장 완료: (${position.latitude}, ${position.longitude})');
+
+      print('위치 저장 완료: (${position.latitude}, ${position.longitude}), H3: $h3Index');
     } catch (e) {
       print('위치 저장 중 오류 발생: $e');
     }
