@@ -248,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   final bump = _bumps[index];
                   return ListTile(
                     leading: const Icon(Icons.person_pin_circle),
-                    title: Text('Bump with ${bump.user2Id}'),
+                    title: Text('Bump with ${bump.userBId}'),
                     subtitle: Text(bump.bumpedAt.toLocal().toString()),
                   );
                 },

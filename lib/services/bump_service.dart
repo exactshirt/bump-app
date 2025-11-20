@@ -46,7 +46,7 @@ class BumpService {
           // 단일 Bump 알림
           await _notificationService.showBumpNotification(
             bumpId: bumps[0].id,
-            otherUserId: bumps[0].user2Id,
+            otherUserId: bumps[0].userBId,
           );
         } else {
           // 다중 Bump 알림

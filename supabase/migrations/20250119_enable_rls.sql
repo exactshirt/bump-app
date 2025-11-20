@@ -39,13 +39,13 @@ CREATE POLICY "Users can delete own locations"
 -- Enable RLS on bumps table
 ALTER TABLE bumps ENABLE ROW LEVEL SECURITY;
 
--- Policy: Users can view bumps where they are either user1 or user2
+-- Policy: Users can view bumps where they are either user_a or user_b
 CREATE POLICY "Users can view own bumps"
   ON bumps
   FOR SELECT
   USING (
-    auth.uid() = user1_id OR
-    auth.uid() = user2_id
+    auth.uid() = user_a_id OR
+    auth.uid() = user_b_id
   );
 
 -- Policy: System can insert bumps (via RPC function)
